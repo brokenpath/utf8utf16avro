@@ -2,6 +2,7 @@ package org.scalameter.examples
 
 import org.scalameter.api._
 
+import benchmarking.QuadArray
 
 
 class SimpleBenchmarkReport extends Bench.OfflineRegressionReport{
@@ -12,21 +13,24 @@ class SimpleBenchmarkReport extends Bench.OfflineRegressionReport{
     HtmlReporter(true)
     )
   
-  val sizes = Gen.range("size")(300000, 1500000, 600000)
+  val sizes = Gen.range("size")(1024*32, 1024 * 128, 1024*32)
+  val arrays : Gen[Array[Int]]= sizes.map(s => QuadArray.infours(s))
 
-  val ranges = for {
-    size <- sizes
-  } yield 0 until size
 
   performance of "Range" in {
-    measure method "map" in {
-      using(ranges) in {
-        r => r.map(_ + 1)
+    measure method "inones" in {
+      using(arrays) in {
+        a => QuadArray.sum_inones(a)
       }
     }
-    measure method "map2" in {
-      using(ranges) in {
-        r => r.map(_ * 1 + 2)
+    measure method "insfours" in {
+      using(arrays) in {
+        a => QuadArray.sum_insfours(a)
+      }
+    }
+    measure method "intfours" in {
+      using(arrays) in {
+        a => QuadArray.sum_intfours(a)
       }
     }
   }
